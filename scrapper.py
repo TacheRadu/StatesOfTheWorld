@@ -1,11 +1,14 @@
 import bs4
+from sqlalchemy import text
 from bs4 import BeautifulSoup
 import requests
+from data.db import engine
 
 WIKI_STATES_URL = 'https://en.wikipedia.org/wiki/List_of_sovereign_states'
+WIKI_NEIGHBOURS_URL = 'https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_land_borders'
 
 
-def check_right_structure(a: bs4.PageElement):
+def in_table_of_countries(a: bs4.PageElement):
     tags = ['b', 'td', 'tr', 'tbody', 'table']
     try:
         if a.name != 'a':
@@ -19,11 +22,22 @@ def check_right_structure(a: bs4.PageElement):
     return True
 
 
-if __name__ == '__main__':
+def get_country_links():
     r = requests.get(WIKI_STATES_URL)
     soup = BeautifulSoup(r.text, features='lxml')
+    country_elements = soup.find_all(in_table_of_countries)
     countries = dict()
-    country_elements = soup.find_all(check_right_structure)
     for elem in country_elements:
         countries[elem.text] = elem.get('href')
-    print(countries)
+    return countries
+
+
+def get_country_neighbours():
+    r = requests.get(WIKI_NEIGHBOURS_URL)
+    soup = BeautifulSoup(r.text, features='lxml')
+
+
+if __name__ == '__main__':
+    links = get_country_links()
+    with engine.connect() as conn:
+        conn.execute(text('SELECT * FROM COUNTRIES'))

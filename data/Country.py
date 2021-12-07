@@ -6,6 +6,7 @@ from data.Base import BaseModel
 
 class Country(BaseModel):
     name = CharField(primary_key=True)
+    wiki_link = CharField()
     capital = CharField()
     population = IntegerField()
     Density = FloatField()

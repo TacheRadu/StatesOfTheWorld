@@ -1,7 +1,7 @@
-from data.base import Base
-from sqlalchemy import Column, String
+from peewee import *
+
+from data.Base import BaseModel
 
 
-class Language(Base):
-    __tablename__ = 'LANGUAGES'
-    language = Column(String(255), primary_key=True)
+class Language(BaseModel):
+    language = CharField(primary_key=True)

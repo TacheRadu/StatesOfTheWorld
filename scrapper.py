@@ -1,8 +1,7 @@
 import bs4
-from sqlalchemy import text
 from bs4 import BeautifulSoup
 import requests
-from data.db import engine
+from data.Country import Country
 
 WIKI_STATES_URL = 'https://en.wikipedia.org/wiki/List_of_sovereign_states'
 WIKI_NEIGHBOURS_URL = 'https://en.wikipedia.org/wiki/List_of_countries_and_territories_by_land_borders'
@@ -26,9 +25,9 @@ def get_country_links():
     r = requests.get(WIKI_STATES_URL)
     soup = BeautifulSoup(r.text, features='lxml')
     country_elements = soup.find_all(in_table_of_countries)
-    countries = dict()
+    countries = []
     for elem in country_elements:
-        countries[elem.text] = elem.get('href')
+        countries.append((Country(name=elem.text), elem.get('href')))
     return countries
 
 
@@ -39,5 +38,3 @@ def get_country_neighbours():
 
 if __name__ == '__main__':
     links = get_country_links()
-    with engine.connect() as conn:
-        conn.execute(text('SELECT * FROM COUNTRIES'))

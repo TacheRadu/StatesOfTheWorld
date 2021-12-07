@@ -1,1 +1,1 @@
-d = 'a'
+import data.Model

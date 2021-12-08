@@ -5,8 +5,8 @@ from data.Base import BaseModel
 
 
 class Country(BaseModel):
-    name = CharField(primary_key=True)
-    wiki_link = CharField()
+    wiki_link = CharField(primary_key=True)
+    name = CharField()
     capital = CharField()
     population = IntegerField()
     Density = FloatField()
@@ -15,6 +15,18 @@ class Country(BaseModel):
     government = CharField()
     languages = ManyToManyField(Language)
     driving_side = CharField()
+
+    def save_neighbours(self):
+        for neighbour in self.neighbours:
+            Neighbours.get_or_create(first_country=self, second_country=neighbour)
+            Neighbours.get_or_create(first_country=neighbour, second_country=self)
+
+    def get_neighbours(self) -> list:
+        Neighbour = Country.alias()
+        return Country.select(Neighbour)\
+            .join(Neighbours, on=Neighbours.first_country)\
+            .join(Neighbour, on=Neighbours.second_country)\
+            .where(Neighbours.first_country == self)
 
 
 class Neighbours(BaseModel):

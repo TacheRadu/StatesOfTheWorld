@@ -7,7 +7,6 @@ from data.Language import Language
 class Country(db.Entity):
     wiki_link = PrimaryKey(str)
     name = Optional(str)
-    capital = Optional(str)
     population = Optional(int)
     Density = Optional(float)
     surface = Optional(float)
@@ -15,4 +14,5 @@ class Country(db.Entity):
     government = Optional(str)
     languages = Set('Language')
     neighbours = Set('Country', reverse='neighbours')
+    capitals = Set('Capital')
     driving_side = Optional(str)

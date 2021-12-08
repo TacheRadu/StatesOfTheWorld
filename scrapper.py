@@ -1,5 +1,7 @@
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
+from pony.orm import db_session
+
 from data.Country import Country
 from tools.html_filters import *
 
@@ -19,15 +21,17 @@ def get_country_links() -> list[str]:
     return links
 
 
+@db_session
 def get_country(link: str) -> Country:
     """The main function that gets the country data.
     Get the soup for the country wiki page, then pass it to different functions that get different things
     """
     r = requests.get(WIKI_HOME + link)
     soup = BeautifulSoup(r.text, features='lxml')
-    country = Country.get_or_create(wiki_link=link)[0]
+    country = Country.get(wiki_link=link)
+    if country is None:
+        country = Country(wiki_link=link)
     country.name = get_country_name(soup)
-    country.save()
     return country
 
 
@@ -39,7 +43,8 @@ def get_country_name(soup: bs4.BeautifulSoup) -> str:
     return soup.body.h1.text
 
 
-def get_country_neighbours(link: str) -> list[Country]:
+@db_session
+def get_country_neighbours(link: str):
     r = requests.get(WIKI_NEIGHBOURS_URL)
     soup = BeautifulSoup(r.text, features='lxml')
     country_rows = soup.find_all(table_country_rows)
@@ -50,17 +55,25 @@ def get_country_neighbours(link: str) -> list[Country]:
         return []
     else:
         my_country_row = my_country_rows[0]
-    return [Country.get_or_create(wiki_link=x.get('href'))[0] for x in my_country_row.find_all('td')[-1].find_all('a')
-            if not x.get('href').startswith('#cite_note')]
+    neighbours = []
+    for x in my_country_row.find_all('td')[-1].find_all('a'):
+        if not x.get('href').startswith('#cite_note'):
+            neighbouring_country = Country.get(wiki_link=x.get('href').replace('/wiki/Denmark', '/wiki/Danish_Realm'))
+            if neighbouring_country is not None:
+                neighbours.append(neighbouring_country)
+    country = Country.get(wiki_link=link)
+    country.neighbours = neighbours
+
+
+def main():
+    country_links = get_country_links()
+    for country_link in country_links:
+        get_country(country_link)
+        print(country_link)
+    print("Now getting neighbours")
+    for country_link in country_links:
+        get_country_neighbours(country_link)
 
 
 if __name__ == '__main__':
-    country_links = get_country_links()
-    my_country = Country.select(Country).where(Country.name == 'Romania')[0]
-    for neigh in my_country.get_neighbours():
-        print(neigh)
-    #for country_link in country_links:
-    #    my_country = get_country(country_link)
-    #    print(my_country)
-    #    my_country.neighbours = get_country_neighbours(my_country.wiki_link)
-    #    my_country.save_neighbours()
+    main()

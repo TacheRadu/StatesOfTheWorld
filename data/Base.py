@@ -1,8 +1,3 @@
-from peewee import *
+from pony.orm import *
 
-db = MySQLDatabase('states_of_the_world', user='root')
-
-
-class BaseModel(Model):
-    class Meta:
-        database = db
+db = Database()

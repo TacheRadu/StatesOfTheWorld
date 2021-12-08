@@ -1,7 +1,8 @@
-from peewee import *
+from pony.orm import PrimaryKey, Set
 
-from data.Base import BaseModel
+from data.Base import db
 
 
-class Language(BaseModel):
-    language = CharField(primary_key=True)
+class Language(db.Entity):
+    language = PrimaryKey(str)
+    spoken_in = Set('Country')

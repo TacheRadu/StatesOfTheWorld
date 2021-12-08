@@ -1,34 +1,18 @@
-from peewee import *
+from pony.orm import PrimaryKey, Set, Optional
 
+from data.Base import db
 from data.Language import Language
-from data.Base import BaseModel
 
 
-class Country(BaseModel):
-    wiki_link = CharField(primary_key=True)
-    name = CharField()
-    capital = CharField()
-    population = IntegerField()
-    Density = FloatField()
-    surface = FloatField()
-    time_zone = CharField()
-    government = CharField()
-    languages = ManyToManyField(Language)
-    driving_side = CharField()
-
-    def save_neighbours(self):
-        for neighbour in self.neighbours:
-            Neighbours.get_or_create(first_country=self, second_country=neighbour)
-            Neighbours.get_or_create(first_country=neighbour, second_country=self)
-
-    def get_neighbours(self) -> list:
-        Neighbour = Country.alias()
-        return Country.select(Neighbour)\
-            .join(Neighbours, on=Neighbours.first_country)\
-            .join(Neighbour, on=Neighbours.second_country)\
-            .where(Neighbours.first_country == self)
-
-
-class Neighbours(BaseModel):
-    first_country = ForeignKeyField(Country, backref='neighbours')
-    second_country = ForeignKeyField(Country, backref='neighbours')
+class Country(db.Entity):
+    wiki_link = PrimaryKey(str)
+    name = Optional(str)
+    capital = Optional(str)
+    population = Optional(int)
+    Density = Optional(float)
+    surface = Optional(float)
+    time_zone = Optional(str)
+    government = Optional(str)
+    languages = Set('Language')
+    neighbours = Set('Country', reverse='neighbours')
+    driving_side = Optional(str)

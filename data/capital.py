@@ -1,6 +1,6 @@
 from pony.orm import PrimaryKey, Optional
 
-from data.Base import db
+from data.base import db
 
 
 class Capital(db.Entity):

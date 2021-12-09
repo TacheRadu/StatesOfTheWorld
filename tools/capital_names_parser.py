@@ -1,8 +1,9 @@
 import bs4
 import re
+from tools.hlp import strip_citations
 
 
-def parse(item: bs4.Tag) -> str:
+def parse_capital_text(item: bs4.Tag) -> str:
     """Parses the particular item in which a capital name is, extracts and returns it.
     It takes up the text up to the first br tag, since from that point forward the text represents coordinates of the
     cities.
@@ -15,5 +16,5 @@ def parse(item: bs4.Tag) -> str:
         if elem.name == 'br':
             break
         capital += elem.text
-    capital = re.sub('\[(.)*\]', '', capital)
+    capital = strip_citations(capital)
     return capital

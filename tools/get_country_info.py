@@ -1,10 +1,15 @@
+import re
+
 from pony.orm import db_session
 from bs4 import BeautifulSoup
 
-from data.Capital import Capital
+from data.capital import Capital
+from data.language import Language
+from data.language_category import LanguageCategory
 from tools.html_filters import *
-from data.Country import Country
-from tools.capital_names_parser import parse
+from data.country import Country
+from tools.hlp import strip_citations
+from tools.capital_names_parser import parse_capital_text
 import requests
 
 WIKI_STATES_URL = 'https://en.wikipedia.org/wiki/List_of_sovereign_states'
@@ -49,24 +54,68 @@ def get_country_capitals(soup: bs4.BeautifulSoup) -> list[Capital]:
             if ul:
                 capitals = []
                 for elem in ul.find_all('li'):
-                    capital_name = parse(elem)
+                    capital_name = parse_capital_text(elem)
                     capital = Capital.get(name=capital_name)
                     if capital is None:
                         capital = Capital(name=capital_name)
+                    print('   ', capital)
                     capitals.append(capital)
                 return capitals
 
-            capital_name = parse(td)
+            capital_name = parse_capital_text(td)
             capital = Capital.get(name=capital_name)
             if capital is None:
                 capital = Capital(name=capital_name)
+            print('   ', capital)
             return [capital]
     return []
 
 
+def get_country_language_categories(soup: bs4.BeautifulSoup) -> list[LanguageCategory]:
+    language_headers = soup.find_all(lambda tag: tag.name == 'th' and 'language' in tag.text
+                                     and not tag.find('div', {'class': 'ib-country-names'}))
+    cats = []
+    for language_header in language_headers:
+        category = strip_citations(''.join(language_header.strings))
+        print('   ' * 2, category)
+        language_cat = LanguageCategory.get(category=category)
+        if not language_cat:
+            language_cat = LanguageCategory(category=category)
+        td = language_header.find_next_sibling('td')
+        language_cat.languages = get_category_languages(td)
+        cats.append(language_cat)
+    return cats
+
+
+def get_category_languages(td: bs4.BeautifulSoup) -> list[Language]:
+    if td:
+        ul = td.find('ul')
+        if ul:
+            # East Timor case where there is a list in a list for no reason
+            if ul.find('ul'):
+                ul = ul.find('ul')
+            languages = []
+            for li in ul.find_all('li'):
+                language_name = re.sub('\n\n\n.*', '', strip_citations(''.join(li.strings)))
+                if language_name == '':
+                    continue
+                language = Language.get(language=language_name)
+                if not language:
+                    language = Language(language=language_name)
+                print('   ' * 3, language)
+                languages.append(language)
+            return languages
+        language_name = re.sub('\n\n\n.*', '', strip_citations(''.join(td.strings)))
+        language = Language.get(language=language_name)
+        if not language:
+            language = Language(language=language_name)
+        print('   ' * 3, language)
+        return [language]
+    return []
+
 
 @db_session
-def get_country_neighbours(link: str):
+def get_country_neighbours(link: str) -> None:
     """Takes the path to the wikipedia page of the country we compute the neighbours of, starting from what's after
     .org. The function will look in the table on the page, find the row for the specified country and looks for the
     countries corresponding to it, looking them up by their link."""
@@ -77,7 +126,7 @@ def get_country_neighbours(link: str):
     if link == '/wiki/Danish_Realm':
         my_country_row = [x for x in country_rows if x.find('td').find('a').get('href') == '/wiki/Denmark'][0]
     elif len(my_country_rows) == 0:
-        return []
+        return
     else:
         my_country_row = my_country_rows[0]
     neighbours = []
@@ -88,5 +137,3 @@ def get_country_neighbours(link: str):
                 neighbours.append(neighbouring_country)
     country = Country.get(wiki_link=link)
     country.neighbours = neighbours
-
-

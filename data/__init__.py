@@ -1,1 +1,1 @@
-import data.Model
+import data.model

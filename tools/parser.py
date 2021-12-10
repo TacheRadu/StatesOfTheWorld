@@ -13,10 +13,11 @@ def parse_capital_text(item: bs4.Tag) -> str:
     a closed bracket.
     """
     capital = ''
-    for elem in item.find_all():
+    for elem in item.descendants:
         if elem.name == 'br':
             break
-        capital += elem.text
+        if isinstance(elem, bs4.NavigableString):
+            capital += elem
     capital = strip_citations(capital)
     return capital
 

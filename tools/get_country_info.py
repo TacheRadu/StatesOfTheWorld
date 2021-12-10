@@ -7,7 +7,7 @@ from data.language_category import LanguageCategory
 from tools.html_filters import *
 from data.country import Country
 from tools.hlp import strip_citations
-from tools.capital_names_parser import parse_capital_text, parse_languages_text
+from tools.parser import parse_capital_text, parse_languages_text
 import requests
 
 WIKI_STATES_URL = 'https://en.wikipedia.org/wiki/List_of_sovereign_states'

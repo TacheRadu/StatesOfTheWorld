@@ -1,5 +1,3 @@
-import re
-
 from pony.orm import db_session
 from bs4 import BeautifulSoup
 
@@ -9,7 +7,7 @@ from data.language_category import LanguageCategory
 from tools.html_filters import *
 from data.country import Country
 from tools.hlp import strip_citations
-from tools.capital_names_parser import parse_capital_text
+from tools.capital_names_parser import parse_capital_text, parse_languages_text
 import requests
 
 WIKI_STATES_URL = 'https://en.wikipedia.org/wiki/List_of_sovereign_states'
@@ -73,18 +71,18 @@ def get_country_capitals(soup: bs4.BeautifulSoup) -> list[Capital]:
 
 def get_country_language_categories(soup: bs4.BeautifulSoup) -> list[LanguageCategory]:
     language_headers = soup.find_all(lambda tag: tag.name == 'th' and 'language' in tag.text
-                                     and not tag.find('div', {'class': 'ib-country-names'}))
-    cats = []
+                                                 and not tag.find('div', {'class': 'ib-country-names'}))
+    categories = []
     for language_header in language_headers:
         category = strip_citations(''.join(language_header.strings))
         print('   ' * 2, category)
-        language_cat = LanguageCategory.get(category=category)
-        if not language_cat:
-            language_cat = LanguageCategory(category=category)
+        language_category = LanguageCategory.get(category=category)
+        if not language_category:
+            language_category = LanguageCategory(category=category)
         td = language_header.find_next_sibling('td')
-        language_cat.languages = get_category_languages(td)
-        cats.append(language_cat)
-    return cats
+        language_category.languages = get_category_languages(td)
+        categories.append(language_category)
+    return categories
 
 
 def get_category_languages(td: bs4.BeautifulSoup) -> list[Language]:
@@ -96,21 +94,27 @@ def get_category_languages(td: bs4.BeautifulSoup) -> list[Language]:
                 ul = ul.find('ul')
             languages = []
             for li in ul.find_all('li'):
-                language_name = re.sub('\n\n\n.*', '', strip_citations(''.join(li.strings)))
-                if language_name == '':
-                    continue
-                language = Language.get(language=language_name)
-                if not language:
-                    language = Language(language=language_name)
-                print('   ' * 3, language)
-                languages.append(language)
+                potential_languages = parse_languages_text(li)
+                potential_languages = list(
+                    map(
+                        lambda l: Language(language=l) if not Language.get(language=l) else Language.get(language=l),
+                        potential_languages
+                    )
+                )
+                for language in potential_languages:
+                    print('   ' * 3, language)
+                languages.extend(potential_languages)
             return languages
-        language_name = re.sub('\n\n\n.*', '', strip_citations(''.join(td.strings)))
-        language = Language.get(language=language_name)
-        if not language:
-            language = Language(language=language_name)
-        print('   ' * 3, language)
-        return [language]
+
+        languages = parse_languages_text(td)
+        languages = list(
+            map(
+                lambda l: Language(language=l) if not Language.get(language=l) else Language.get(language=l), languages
+            )
+        )
+        for language in languages:
+            print('   ' * 3, language)
+        return languages
     return []
 
 

@@ -1,6 +1,7 @@
-import bs4
 import re
-from tools.hlp import strip_citations
+
+import bs4
+from tools.hlp import beautiful_strip, strip_citations
 
 
 def parse_capital_text(item: bs4.Tag) -> str:
@@ -18,3 +19,33 @@ def parse_capital_text(item: bs4.Tag) -> str:
         capital += elem.text
     capital = strip_citations(capital)
     return capital
+
+
+def parse_languages_text(item: bs4.Tag) -> list[str]:
+
+    # For the incredible cases of Pakistan and the countries with languages split by commas:
+    languages = re.split(',|\u2022', beautiful_strip(item.text))
+    if len(languages) > 1:
+        languages = [beautiful_strip(language) for language in languages if beautiful_strip(language) != '']
+        # Amazing case for Luxembourg:
+
+        return ['Luxembourgish' if language.find('Luxembourgish') != -1 else language for language in languages]
+
+    languages = []
+    language = ''
+    found_one = False
+    for elem in item.descendants:
+        if elem.name == 'br' or elem.name == 'small':
+            language = beautiful_strip(language)
+            found_one = True
+            if language != '':
+                languages.append(language)
+            language = ''
+        else:
+            if isinstance(elem, bs4.NavigableString):
+                language += elem
+    language = beautiful_strip(language)
+    if language != '':
+        languages.append(language)
+
+    return languages

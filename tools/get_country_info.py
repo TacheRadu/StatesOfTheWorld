@@ -6,7 +6,7 @@ from data.language import Language
 from data.language_category import LanguageCategory
 from tools.html_filters import *
 from data.country import Country
-from tools.hlp import strip_citations
+from tools.hlp import beautiful_strip, to_int
 from tools.parser import parse_capital_text, parse_languages_text
 import requests
 
@@ -33,7 +33,7 @@ def get_country_name(soup: bs4.BeautifulSoup) -> str:
     return soup.body.h1.text
 
 
-def get_country_capitals(soup: bs4.BeautifulSoup) -> list[Capital]:
+def get_country_capitals(table: bs4.Tag) -> list[Capital]:
     """Get a list of capitals. A country might have no capital, one or more capitals. So search for a table head
     which contains the word Capital. If the country has capitals, that will exist. If we can't find it, it doesn't
     have capitals, so we're returning an empty list. Beneath the table head will be the table data with the capitals.
@@ -41,7 +41,7 @@ def get_country_capitals(soup: bs4.BeautifulSoup) -> list[Capital]:
     capital.
     We parse the page elements and get the capital name.
     """
-    capital_header = soup.find(lambda tag: tag.name == 'th' and 'Capital' in tag.text)
+    capital_header = table.find(lambda tag: tag.name == 'th' and 'Capital' in tag.text)
     if capital_header:
         td = capital_header.find_next_sibling('td')
         if td:
@@ -69,12 +69,12 @@ def get_country_capitals(soup: bs4.BeautifulSoup) -> list[Capital]:
     return []
 
 
-def get_country_language_categories(soup: bs4.BeautifulSoup) -> list[LanguageCategory]:
-    language_headers = soup.find_all(lambda tag: tag.name == 'th' and 'language' in tag.text
-                                                 and not tag.find('div', {'class': 'ib-country-names'}))
+def get_country_language_categories(table: bs4.Tag) -> list[LanguageCategory]:
+    language_headers = table.find_all(lambda tag: tag.name == 'th' and 'language' in tag.text
+                                      and not tag.find('div', {'class': 'ib-country-names'}))
     categories = []
     for language_header in language_headers:
-        category = strip_citations(''.join(language_header.strings))
+        category = beautiful_strip(''.join(language_header.strings))
         print('   ' * 2, category)
         language_category = LanguageCategory.get(category=category)
         if not language_category:
@@ -85,7 +85,7 @@ def get_country_language_categories(soup: bs4.BeautifulSoup) -> list[LanguageCat
     return categories
 
 
-def get_category_languages(td: bs4.BeautifulSoup) -> list[Language]:
+def get_category_languages(td: bs4.Tag) -> list[Language]:
     if td:
         ul = td.find('ul')
         if ul:
@@ -116,6 +116,13 @@ def get_category_languages(td: bs4.BeautifulSoup) -> list[Language]:
             print('   ' * 3, language)
         return languages
     return []
+
+
+def get_country_population(table: bs4.Tag) -> int:
+    th = table.find_all(lambda table_h: table_h.name == 'th' and 'Population' in table_h.text)[0]
+    td = th.parent.next_sibling.td
+    print(to_int(beautiful_strip(td.text)))
+    return to_int(beautiful_strip(td.text))
 
 
 @db_session

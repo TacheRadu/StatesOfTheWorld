@@ -34,11 +34,9 @@ def parse_languages_text(item: bs4.Tag) -> list[str]:
 
     languages = []
     language = ''
-    found_one = False
     for elem in item.descendants:
         if elem.name == 'br' or elem.name == 'small':
             language = beautiful_strip(language)
-            found_one = True
             if language != '':
                 languages.append(language)
             language = ''

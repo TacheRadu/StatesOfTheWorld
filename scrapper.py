@@ -17,6 +17,7 @@ def get_country(link: str) -> Country:
     print(country.name)
     country_table = soup.find('table', {'class': 'infobox ib-country vcard'})
     country.capitals = get_country_capitals(country_table)
+    country.population = get_country_population(country_table)
     country.language_categories = get_country_language_categories(country_table)
     return country
 

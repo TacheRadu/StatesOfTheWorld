@@ -6,7 +6,7 @@ from data.language import Language
 from data.language_category import LanguageCategory
 from tools.html_filters import *
 from data.country import Country
-from tools.hlp import beautiful_strip, to_int
+from tools.hlp import beautiful_strip, to_int, get_density
 from tools.parser import parse_capital_text, parse_languages_text
 import requests
 
@@ -119,10 +119,19 @@ def get_category_languages(td: bs4.Tag) -> list[Language]:
 
 
 def get_country_population(table: bs4.Tag) -> int:
-    th = table.find_all(lambda table_h: table_h.name == 'th' and 'Population' in table_h.text)[0]
+    th = table.find(lambda table_h: table_h.name == 'th' and 'Population' in table_h.text)
     td = th.parent.next_sibling.td
     print(to_int(beautiful_strip(td.text)))
     return to_int(beautiful_strip(td.text))
+
+
+def get_country_density(table: bs4.Tag) -> float:
+    th = table.find(lambda table_h: table_h.name == 'th' and 'Density' in table_h.text)
+    if th:
+        td = th.find_next_sibling('td')
+        print(get_density(beautiful_strip(td.text)))
+        return get_density(beautiful_strip(td.text))
+    return 0
 
 
 @db_session

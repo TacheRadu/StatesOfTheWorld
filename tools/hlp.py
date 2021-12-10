@@ -1,6 +1,8 @@
 import math
 import re
 
+import bs4
+
 
 def beautiful_strip(string: str) -> str:
     return re.sub('\n\n\n.*', '', strip_citations(string))
@@ -40,3 +42,8 @@ def to_int(string: str) -> int:
     else:
         number, _ = get_number_and_decimals(string.strip(), ',')
     return number * int(math.pow(10, multiplication_factor - division_factor))
+
+
+def get_density(string: str) -> float:
+    number, div = get_number_and_decimals(string, '.')
+    return number / math.pow(10, div)

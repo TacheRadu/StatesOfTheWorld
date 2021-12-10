@@ -8,7 +8,7 @@ class Country(db.Entity):
     wiki_link = PrimaryKey(str)
     name = Optional(str)
     population = Optional(int)
-    Density = Optional(float)
+    density = Optional(float)
     surface = Optional(float)
     time_zone = Optional(str)
     government = Optional(str)

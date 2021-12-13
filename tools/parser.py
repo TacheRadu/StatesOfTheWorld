@@ -22,6 +22,24 @@ def parse_capital_text(item: bs4.Tag) -> str:
     return capital
 
 
+def split_by_tags(item: bs4.Tag, tags: list[str]) -> list[str]:
+    strings = []
+    string = ''
+    for elem in item.descendants:
+        if elem.name in tags:
+            string = beautiful_strip(string)
+            if string != '':
+                strings.append(string)
+            string = ''
+        else:
+            if isinstance(elem, bs4.NavigableString):
+                string += elem
+    string = beautiful_strip(string)
+    if string != '':
+        strings.append(string)
+    return strings
+
+
 def parse_languages_text(item: bs4.Tag) -> list[str]:
 
     # For the incredible cases of Pakistan and the countries with languages split by commas:
@@ -32,19 +50,4 @@ def parse_languages_text(item: bs4.Tag) -> list[str]:
 
         return ['Luxembourgish' if language.find('Luxembourgish') != -1 else language for language in languages]
 
-    languages = []
-    language = ''
-    for elem in item.descendants:
-        if elem.name == 'br' or elem.name == 'small':
-            language = beautiful_strip(language)
-            if language != '':
-                languages.append(language)
-            language = ''
-        else:
-            if isinstance(elem, bs4.NavigableString):
-                language += elem
-    language = beautiful_strip(language)
-    if language != '':
-        languages.append(language)
-
-    return languages
+    return split_by_tags(item, ['br', 'small'])

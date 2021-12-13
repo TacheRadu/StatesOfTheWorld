@@ -7,7 +7,7 @@ from data.language_category import LanguageCategory
 from tools.html_filters import *
 from data.country import Country
 from tools.hlp import beautiful_strip, to_int, to_float
-from tools.parser import parse_capital_text, parse_languages_text
+from tools.parser import parse_capital_text, parse_languages_text, split_by_tags
 import requests
 
 WIKI_STATES_URL = 'https://en.wikipedia.org/wiki/List_of_sovereign_states'
@@ -56,7 +56,6 @@ def get_country_capitals(table: bs4.Tag) -> list[Capital]:
                     capital = Capital.get(name=capital_name)
                     if capital is None:
                         capital = Capital(name=capital_name)
-                    print('   ', capital)
                     capitals.append(capital)
                 return capitals
 
@@ -64,7 +63,6 @@ def get_country_capitals(table: bs4.Tag) -> list[Capital]:
             capital = Capital.get(name=capital_name)
             if capital is None:
                 capital = Capital(name=capital_name)
-            print('   ', capital)
             return [capital]
     return []
 
@@ -75,7 +73,6 @@ def get_country_language_categories(table: bs4.Tag) -> list[LanguageCategory]:
     categories = []
     for language_header in language_headers:
         category = beautiful_strip(''.join(language_header.strings))
-        print('   ' * 2, category)
         language_category = LanguageCategory.get(category=category)
         if not language_category:
             language_category = LanguageCategory(category=category)
@@ -101,8 +98,6 @@ def get_category_languages(td: bs4.Tag) -> list[Language]:
                         potential_languages
                     )
                 )
-                for language in potential_languages:
-                    print('   ' * 3, language)
                 languages.extend(potential_languages)
             return languages
 
@@ -112,8 +107,6 @@ def get_category_languages(td: bs4.Tag) -> list[Language]:
                 lambda l: Language(language=l) if not Language.get(language=l) else Language.get(language=l), languages
             )
         )
-        for language in languages:
-            print('   ' * 3, language)
         return languages
     return []
 
@@ -143,9 +136,34 @@ def get_country_area(table: bs4.Tag) -> float:
         area = 0
         for td in tds:
             area += to_float(beautiful_strip(td.text))
-        print(area)
         return area
     return 0
+
+
+def get_country_time_zone(table: bs4.Tag) -> str:
+    th = table.find(lambda table_h: table_h.name == 'th' and 'Time zone' in table_h.text)
+    if th:
+        tds = [th.find_next_sibling('td')]
+        for tr in th.parent.find_next_siblings('tr'):
+            if not tr.get('class'):
+                break
+            tds.append(tr.td)
+            if 'mergedbottomrow' in tr.get('class'):
+                break
+        time_zone = ''
+        for td in tds:
+            strings = split_by_tags(td, ['br', 'span'])
+            if len(strings) == 1 and not td.text.startswith('Note:'):
+                time_zone += beautiful_strip(td.text) + '\n'
+            else:
+                for string in strings:
+                    # Case for France:
+                    if string.startswith('Note:'):
+                        break
+                    time_zone += beautiful_strip(string) + '\n'
+        print(time_zone)
+        return time_zone
+    return ''
 
 
 @db_session

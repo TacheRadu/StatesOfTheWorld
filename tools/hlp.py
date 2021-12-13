@@ -1,8 +1,6 @@
 import math
 import re
 
-import bs4
-
 
 def beautiful_strip(string: str) -> str:
     return re.sub('\n\n\n.*', '', strip_citations(string))

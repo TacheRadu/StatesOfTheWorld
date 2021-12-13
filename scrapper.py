@@ -5,8 +5,13 @@ WIKI_HOME = 'https://en.wikipedia.org'
 
 @db_session
 def get_country(link: str) -> Country:
-    """The main function that gets the country data.
+    """
+    The main function that gets the country data.
     Get the soup for the country wiki page, then pass it to different functions that get different things
+
+    :param link: relative link to the country's wikipedia page
+    :return: The country, after extracting data from the page
+    :rtype: Country
     """
     r = requests.get(WIKI_HOME + link)
     soup = BeautifulSoup(r.text, features='lxml')
@@ -28,6 +33,10 @@ def get_country(link: str) -> Country:
 
 
 def main():
+    """
+    We run things from here, duuh.
+    :return: None
+    """
     country_links = get_country_links()
     for country_link in country_links:
         get_country(country_link)

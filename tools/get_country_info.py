@@ -93,9 +93,7 @@ def get_country_language_categories(table: bs4.Tag) -> list[LanguageCategory]:
     categories = []
     for language_header in language_headers:
         category = beautiful_strip(''.join(language_header.strings))
-        language_category = LanguageCategory.get(category=category)
-        if not language_category:
-            language_category = LanguageCategory(category=category)
+        language_category = LanguageCategory(category=category)
         td = language_header.find_next_sibling('td')
         language_category.languages = get_languages(td)
         categories.append(language_category)

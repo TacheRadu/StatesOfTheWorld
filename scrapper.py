@@ -24,6 +24,7 @@ def get_country(link: str) -> Country:
     country.capitals = get_country_capitals(country_table)
     country.population = get_country_population(country_table)
     country.density = get_country_density(country_table)
+    country.surface = get_country_area(country_table)
     country.area = get_country_area(country_table)
     country.language_categories = get_country_language_categories(country_table)
     country.time_zone = get_country_time_zone(country_table)

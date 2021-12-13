@@ -21,3 +21,5 @@ def top(top_count, criteria):
 def countries(criteria, value):
     if criteria == 'language':
         return countries_by_language(value)
+    elif criteria == 'time-zone':
+        return countries_by_time_zone(value)

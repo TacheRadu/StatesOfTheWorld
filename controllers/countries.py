@@ -25,3 +25,12 @@ def countries_by_language(language):
                             )
         }
     )
+
+
+@db_session
+def countries_by_time_zone(time_zone):
+    return json.dumps(
+        [
+            c.name for c in select(c for c in Country if time_zone in c.time_zone)
+        ]
+    )

@@ -23,6 +23,7 @@ def get_country(link: str) -> Country:
     country.language_categories = get_country_language_categories(country_table)
     country.time_zone = get_country_time_zone(country_table)
     country.government = get_country_government(country_table)
+    country.driving_side = get_country_driving_side(country_table)
     return country
 
 

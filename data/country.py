@@ -1,7 +1,6 @@
 from pony.orm import PrimaryKey, Set, Optional
 
 from data.base import db
-from data.language import Language
 
 
 class Country(db.Entity):

@@ -1,3 +1,4 @@
+import bs4
 from pony.orm import db_session
 from bs4 import BeautifulSoup
 
@@ -169,6 +170,15 @@ def get_country_government(table: bs4.Tag) -> str:
     th = table.find(lambda table_h: table_h.name == 'th' and 'Government' in table_h.text)
     if th:
         td = th.find_next_sibling('td')
+        return beautiful_strip(td.text)
+    return ''
+
+
+def get_country_driving_side(table: bs4.Tag) -> str:
+    th = table.find(lambda table_h: table_h.name == 'th' and 'Driving side' in table_h.text)
+    if th:
+        td = th.find_next_sibling('td')
+        print(beautiful_strip(td.text))
         return beautiful_strip(td.text)
     return ''
 

@@ -53,3 +53,21 @@ def countries_by_driving_side(driving_side):
             for c in select(c for c in Country if driving_side in c.driving_side.driving_side)
         ]
     )
+
+
+@db_session
+def country_info(country):
+    c = Country.get(name=country)
+    return json.dumps(
+        {
+            'Name': c.name,
+            'Wikipedia link': c.wiki_link,
+            'Population': c.population,
+            'Density': c.density,
+            'Surface': c.surface,
+            'Time zone': c.time_zone,
+            'Government': c.government,
+            'Driving side': c.driving_side.driving_side,
+            'Languages': {lc.category: [l.language for l in lc.languages] for lc in c.language_categories}
+        }
+    )

@@ -43,3 +43,13 @@ def countries_by_government(government):
             {c.name: c.government} for c in select(c for c in Country if government in c.government)
         ]
     )
+
+
+@db_session
+def countries_by_driving_side(driving_side):
+    return json.dumps(
+        [
+            {c.name: c.driving_side.driving_side}
+            for c in select(c for c in Country if driving_side in c.driving_side.driving_side)
+        ]
+    )

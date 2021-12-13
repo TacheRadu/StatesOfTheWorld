@@ -25,3 +25,5 @@ def countries(criteria, value):
         return countries_by_time_zone(value)
     elif criteria == 'government':
         return countries_by_government(value)
+    elif criteria == 'driving-side':
+        return countries_by_driving_side(value)

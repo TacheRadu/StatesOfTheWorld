@@ -13,3 +13,9 @@ def by_population(top_count: int):
 def by_density(top_count: int):
     return json.dumps([[c.name, str(c.density) + '/km2'] for c in
                        select(c for c in Country).order_by(desc(Country.density)).limit(top_count)[:]])
+
+
+@db_session
+def by_area(top_count: int):
+    return json.dumps([[c.name, str(c.surface) + ' km2'] for c in
+                       select(c for c in Country).order_by(desc(Country.surface)).limit(top_count)[:]])

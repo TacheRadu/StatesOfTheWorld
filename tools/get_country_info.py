@@ -161,8 +161,15 @@ def get_country_time_zone(table: bs4.Tag) -> str:
                     if string.startswith('Note:'):
                         break
                     time_zone += beautiful_strip(string) + '\n'
-        print(time_zone)
         return time_zone
+    return ''
+
+
+def get_country_government(table: bs4.Tag) -> str:
+    th = table.find(lambda table_h: table_h.name == 'th' and 'Government' in table_h.text)
+    if th:
+        td = th.find_next_sibling('td')
+        return beautiful_strip(td.text)
     return ''
 
 

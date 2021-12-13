@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from data.capital import Capital
 from data.language import Language
 from data.language_category import LanguageCategory
+from data.driving_side import DrivingSide
 from tools.html_filters import *
 from data.country import Country
 from tools.hlp import beautiful_strip, to_int, to_float
@@ -174,13 +175,20 @@ def get_country_government(table: bs4.Tag) -> str:
     return ''
 
 
-def get_country_driving_side(table: bs4.Tag) -> str:
+def get_country_driving_side(table: bs4.Tag) -> DrivingSide:
     th = table.find(lambda table_h: table_h.name == 'th' and 'Driving side' in table_h.text)
     if th:
         td = th.find_next_sibling('td')
-        print(beautiful_strip(td.text))
-        return beautiful_strip(td.text)
-    return ''
+        side = beautiful_strip(td.text)
+        print(side)
+        driving_side = DrivingSide.get(driving_side=side)
+        if not driving_side:
+            driving_side = DrivingSide(driving_side=side)
+        return driving_side
+    driving_side = DrivingSide.get(driving_side='')
+    if not driving_side:
+        driving_side = DrivingSide(driving_side='')
+    return driving_side
 
 
 @db_session

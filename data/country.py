@@ -14,4 +14,4 @@ class Country(db.Entity):
     language_categories = Set('LanguageCategory')
     neighbours = Set('Country', reverse='neighbours')
     capitals = Set('Capital')
-    driving_side = Optional(str)
+    driving_side = Optional('DrivingSide')

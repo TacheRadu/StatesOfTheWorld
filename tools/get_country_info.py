@@ -180,7 +180,6 @@ def get_country_driving_side(table: bs4.Tag) -> DrivingSide:
     if th:
         td = th.find_next_sibling('td')
         side = beautiful_strip(td.text)
-        print(side)
         driving_side = DrivingSide.get(driving_side=side)
         if not driving_side:
             driving_side = DrivingSide(driving_side=side)

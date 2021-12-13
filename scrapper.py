@@ -31,9 +31,9 @@ def main():
     country_links = get_country_links()
     for country_link in country_links:
         get_country(country_link)
-    print("Now getting neighbours")
-    # for country_link in country_links:
-    #     get_country_neighbours(country_link)
+    for country_link in country_links:
+        print(country_link)
+        get_country_neighbours(country_link)
 
 
 if __name__ == '__main__':

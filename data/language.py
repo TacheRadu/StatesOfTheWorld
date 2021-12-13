@@ -1,4 +1,4 @@
-from pony.orm import PrimaryKey, Set
+from pony.orm import Required, Set
 
 from data.base import db
 
@@ -6,5 +6,5 @@ from data.base import db
 class Language(db.Entity):
     """Class corresponding to the DB table for languages."""
     _table_ = 'languages'
-    language = PrimaryKey(str)
+    language = Required(str)
     part_of = Set('LanguageCategory')

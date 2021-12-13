@@ -2,7 +2,12 @@ import bs4
 
 
 def table_country_links(a: bs4.Tag) -> bool:
-    """Get the a tags with the country links only."""
+    """
+    Get the a tags with the country links only.
+    :param a: BeautifulSoup Tag object representing an a tag
+    :return: Whether or not it contains the country link
+    :rtype: bool
+    """
     tags = ['b', 'td', 'tr', 'tbody', 'table']
     try:
         if a.name != 'a':
@@ -17,7 +22,12 @@ def table_country_links(a: bs4.Tag) -> bool:
 
 
 def table_country_rows(tr: bs4.Tag) -> bool:
-    """Get the table rows for each country and its neighbours."""
+    """
+    Get the table rows for each country and its neighbours.
+    :param tr: BeautifulSoup Tag object representing a table row.
+    :return: Whether or not the table row corresponds to a country-neighbours relation
+    :rtype: bool
+    """
     tags = ['tbody', 'table']
     try:
         if tr.name != 'tr' or len(tr.find_all('td')) != 6:

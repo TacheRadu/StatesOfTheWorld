@@ -23,3 +23,5 @@ def countries(criteria, value):
         return countries_by_language(value)
     elif criteria == 'time-zone':
         return countries_by_time_zone(value)
+    elif criteria == 'government':
+        return countries_by_government(value)

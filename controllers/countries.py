@@ -1,6 +1,6 @@
 import json
 
-from pony.orm import select, exists, db_session, set_sql_debug
+from pony.orm import select, exists, db_session
 
 from data import Country
 
@@ -31,6 +31,15 @@ def countries_by_language(language):
 def countries_by_time_zone(time_zone):
     return json.dumps(
         [
-            c.name for c in select(c for c in Country if time_zone in c.time_zone)
+            {c.name: c.time_zone}for c in select(c for c in Country if time_zone in c.time_zone)
+        ]
+    )
+
+
+@db_session
+def countries_by_government(government):
+    return json.dumps(
+        [
+            {c.name: c.government} for c in select(c for c in Country if government in c.government)
         ]
     )

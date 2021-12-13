@@ -5,7 +5,7 @@ from data.base import db
 
 class Country(db.Entity):
     """Class corresponding to the DB table for countries."""
-    _table_ = 'COUNTRIES'
+    _table_ = 'countries'
     wiki_link = PrimaryKey(str)
     name = Optional(str)
     population = Optional(int)

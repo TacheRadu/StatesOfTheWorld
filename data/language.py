@@ -5,6 +5,6 @@ from data.base import db
 
 class Language(db.Entity):
     """Class corresponding to the DB table for languages."""
-    _table_ = 'LANGUAGES'
+    _table_ = 'languages'
     language = PrimaryKey(str)
     part_of = Set('LanguageCategory')

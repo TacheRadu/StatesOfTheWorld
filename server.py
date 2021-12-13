@@ -12,3 +12,5 @@ def top(top_count, criteria):
         return by_density(top_count)
     elif criteria == 'surface':
         return by_area(top_count)
+    elif criteria == 'number-of-neighbours':
+        return by_number_of_neighbours(top_count)

@@ -1,4 +1,6 @@
 from time import sleep
+from types import Union
+from typing import Optional, Any
 
 import requests
 
@@ -8,7 +10,7 @@ WIKI_HOME = 'https://en.wikipedia.org'
 
 
 @db_session
-def get_country(link: str) -> Country:
+def get_country(link: str) -> Union[Optional[Country], Any]:
     """
     The main function that gets the country data.
     Get the soup for the country wiki page, then pass it to different functions that get different things
@@ -18,22 +20,22 @@ def get_country(link: str) -> Country:
     :rtype: Country
     """
     for i in range(5):
-        sleep(0.2)
         try:
             r = requests.get(WIKI_HOME + link)
         except requests.RequestException:
             print('Request went bad..')
+            sleep(0.2)
             continue
         break
 
     if r.status_code != 200:
         print('Didn\'t receive what I expected..')
-        raise SystemExit
+        return
     try:
         soup = BeautifulSoup(r.text, features='lxml')
     except Exception:
         print('Data in response is not relevant')
-        raise SystemExit
+        return
 
     country = Country.get(wiki_link=link)
     if country is None:

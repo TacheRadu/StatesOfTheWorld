@@ -1,3 +1,7 @@
+from time import sleep
+
+import requests
+
 from tools.get_country_info import *
 
 WIKI_HOME = 'https://en.wikipedia.org'
@@ -13,8 +17,24 @@ def get_country(link: str) -> Country:
     :return: The country, after extracting data from the page
     :rtype: Country
     """
-    r = requests.get(WIKI_HOME + link)
-    soup = BeautifulSoup(r.text, features='lxml')
+    for i in range(5):
+        sleep(0.2)
+        try:
+            r = requests.get(WIKI_HOME + link)
+        except requests.RequestException:
+            print('Request went bad..')
+            continue
+        break
+
+    if r.status_code != 200:
+        print('Didn\'t receive what I expected..')
+        raise SystemExit
+    try:
+        soup = BeautifulSoup(r.text, features='lxml')
+    except Exception:
+        print('Data in response is not relevant')
+        raise SystemExit
+
     country = Country.get(wiki_link=link)
     if country is None:
         country = Country(wiki_link=link)

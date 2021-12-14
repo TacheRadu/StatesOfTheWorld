@@ -24,7 +24,7 @@ def countries_by_language(language):
                             )
                             )
         }
-    )
+        , ensure_ascii=False).encode('utf-8')
 
 
 @db_session
@@ -33,7 +33,7 @@ def countries_by_time_zone(time_zone):
         [
             {c.name: c.time_zone}for c in select(c for c in Country if time_zone in c.time_zone)
         ]
-    )
+        , ensure_ascii=False).encode('utf-8')
 
 
 @db_session
@@ -42,7 +42,7 @@ def countries_by_government(government):
         [
             {c.name: c.government} for c in select(c for c in Country if government in c.government)
         ]
-    )
+        , ensure_ascii=False).encode('utf-8')
 
 
 @db_session
@@ -52,7 +52,7 @@ def countries_by_driving_side(driving_side):
             {c.name: c.driving_side.driving_side}
             for c in select(c for c in Country if driving_side in c.driving_side.driving_side)
         ]
-    )
+        , ensure_ascii=False).encode('utf-8')
 
 
 @db_session
@@ -70,4 +70,4 @@ def country_info(country):
             'Driving side': c.driving_side.driving_side,
             'Languages': {lc.category: [l.language for l in lc.languages] for lc in c.language_categories}
         }
-    )
+        , ensure_ascii=False).encode('utf-8')
